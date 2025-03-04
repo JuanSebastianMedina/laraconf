@@ -11,11 +11,7 @@ class Conference extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    // The attributes that are mass assignable.
     protected $fillable = [
         'name',
         'description',
@@ -26,11 +22,7 @@ class Conference extends Model
         'venue_id',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
+    // The attributes that should be cast to native types.
     protected $casts = [
         'id' => 'integer',
         'start_date' => 'datetime',

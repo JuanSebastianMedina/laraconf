@@ -1,0 +1,2 @@
+    // The attributes that aren't mass assignable.
+    protected $guarded = [];

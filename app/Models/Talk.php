@@ -11,22 +11,14 @@ class Talk extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    // The attributes that are mass assignable.
     protected $fillable = [
         'title',
         'abstract',
         'speaker_id',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
+    // The attributes that should be cast to native types.
     protected $casts = [
         'id' => 'integer',
         'speaker_id' => 'integer',
