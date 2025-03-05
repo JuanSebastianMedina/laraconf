@@ -3,7 +3,7 @@ models:
     name: string
     description: string
     start_date: datetime
-    end_date: satetime
+    end_date: datetime
     status: string
     region: string
     venue_id: unsignedInteger nullable

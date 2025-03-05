@@ -25,7 +25,7 @@ class ConferenceFactory extends Factory
             'name' => fake()->name(),
             'description' => fake()->text(),
             'start_date' => fake()->dateTime(),
-            'end_date' => fake()->word(),
+            'end_date' => fake()->dateTime(),
             'status' => fake()->word(),
             'region' => fake()->word(),
             'venue_id' => Venue::factory(),

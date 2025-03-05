@@ -26,6 +26,7 @@ class Conference extends Model
     protected $casts = [
         'id' => 'integer',
         'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'venue_id' => 'integer',
     ];
 
