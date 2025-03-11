@@ -25,48 +25,7 @@ class ConferenceResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(label: 'Conferencia')
-                    ->required()
-                    ->default( state: 'Mi conferencia')
-                    ->maxLength(60),
-                Forms\Components\MarkdownEditor::make('description')
-                    ->required(),
-                Forms\Components\DatePicker::make('start_date')
-                    ->native( condition: false)
-                    ->required(),
-                Forms\Components\DatePicker::make('end_date')
-                    ->native( condition: false)
-                    ->required(),
-                Forms\Components\Checkbox::make( name: 'is_published')
-                    ->default( state: true),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'published' => 'Published',
-                        'archived' => 'Archived',
-                    ])
-                    ->required(),
-                Forms\Components\Select::make('region')
-                    ->live()
-                    ->enum( Region::class)
-                    ->options( Region::class),
-                Forms\Components\Select::make('venue_id')
-                    ->searchable()
-                    ->preload()
-                    ->createOptionForm(Venue::getForm())
-                    ->editOptionForm(Venue::getForm())
-                    ->relationship('venue', 'name', modifyQueryUsing: function (Builder $query, Forms\Get $get){
-                        return $query->where('region', $get('region'));
-                    }),
-                Forms\Components\CheckboxList::make('speakers')
-                    ->relationship('speakers', 'name')
-                    ->options(
-                        Speaker::all()->pluck('name', 'id')
-                    )
-                    ->required(),
-            ]);
+            ->schema( Conference::getForm()); // Envia el formulario al modelo
     }
 
     public static function table(Table $table): Table
