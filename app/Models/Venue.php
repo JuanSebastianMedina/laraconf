@@ -5,14 +5,18 @@ namespace App\Models;
 use App\Enums\Region;
 use App\Models\Conference;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\HasMedia;
 
-class Venue extends Model
+class Venue extends Model implements HasMedia
 {
     use HasFactory;
+    use InteractsWithMedia;
 
     // The attributes that are mass assignable.
     protected $fillable = [
@@ -51,6 +55,10 @@ class Venue extends Model
             Select::make('region')
                 ->enum( Region::class)
                 ->options( Region::class),
+            SpatieMediaLibraryFileUpload::make('images')
+                ->collection('venue-images')
+                ->multiple()
+                ->image(),
         ];
     }
 }
