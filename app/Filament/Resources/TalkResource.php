@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\TalkLength;
-use App\Filament\Resources\TalkResource\Pages;
-use App\Filament\Resources\TalkResource\RelationManagers;
-use App\Models\Talk;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Talk;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Enums\TalkLength;
+use App\Enums\TalkStatus;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\TalkResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\TalkResource\RelationManagers;
 
 class TalkResource extends Resource
 {
@@ -37,12 +38,22 @@ class TalkResource extends Resource
                     ->relationship('speaker', 'name')
                     ->label('Ponente')
                     ->required(),
+                Forms\Components\Select::make('status')
+                    ->label('Estado')
+                    ->live()
+                    ->enum( TalkStatus::class)
+                    ->options( TalkStatus::class)
+                    ->required(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->persistFiltersInSession()
+            ->filtersTriggerAction( function ($action) {
+                return $action->button()->label('Filtrar');
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('Titulo')
@@ -63,14 +74,17 @@ class TalkResource extends Resource
                 Tables\Columns\TextColumn::make('speaker.name')
                     ->label('Ponente')
                     ->sortable(),
-                Tables\Columns\ToggleColumn::make('new_talk'),
+                Tables\Columns\ToggleColumn::make('new_talk')
+                    ->label('Charla nueva'),
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Estado')
                     ->badge()
                     ->sortable()
                     ->color( function($state) {
                         return $state->getColor();
                     }),
                 Tables\Columns\IconColumn::make('length')
+                    ->label('Duración')
                     ->icon( function ($state) {
                         return match($state){
                             TalkLength::NORMAL => 'heroicon-o-megaphone',
@@ -82,7 +96,20 @@ class TalkResource extends Resource
                 // Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('new_talk'),
+                Tables\Filters\SelectFilter::make('speaker')
+                    ->relationship('speaker', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\Filter::make('has_avatar')
+                    ->label('Mostrar solamente los que tienen avatar')
+                    ->toggle()
+                    ->query(function ($query) {
+                        return $query->whereHas('speaker', function (Builder $query) {
+                            $query->whereNotNull('avatar');
+                        });
+                    })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
