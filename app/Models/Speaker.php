@@ -9,11 +9,21 @@ use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class Speaker extends Model
 {
     use HasFactory;
+
+    const QUALIFICATIONS = [
+        'leader' => 'Liderazgo',
+        'charisma' => 'Carisma',
+        'humanitarian' => 'Trabajo humanitario',
+        'contributor' => 'contribuyente',
+        'influencer' => 'Influencer',
+        'open_source' => 'Open Source'
+    ];
 
     // The attributes that are mass assignable.
     protected $fillable = [
@@ -32,6 +42,11 @@ class Speaker extends Model
     public function conferences(): BelongsToMany
     {
         return $this->belongsToMany(Conference::class);
+    }
+
+    public function talks(): HasMany
+    {
+        return $this->hasMany(Talk::class);
     }
 
     public static function getForm(): array
@@ -58,14 +73,7 @@ class Speaker extends Model
                 ->columnSpanFull()
                 ->searchable()
                 ->bulkToggleable()
-                ->options([
-                    'leader' => 'Liderazgo',
-                    'charisma' => 'Carisma',
-                    'humanitarian' => 'Trabajo humanitario',
-                    'contributor' => 'contribuyente',
-                    'influencer' => 'Influencer',
-                    'open_source' => 'Open Source'
-                ])
+                ->options( self::QUALIFICATIONS)
                 ->descriptions([
                     'leader' => 'Descata como lider',
                     'charisma' => 'Destaca por su carisma',
