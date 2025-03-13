@@ -11,7 +11,9 @@ use App\Enums\TalkStatus;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use App\Filament\Resources\TalkResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\TalkResource\RelationManagers;
@@ -112,12 +114,63 @@ class TalkResource extends Resource
                     })
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->slideOver(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('approve')
+                        ->visible( function ($record) {
+                            return $record->status === (TalkStatus::SUBMITTED);
+                        })
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action( function (Talk $record) {
+                            $record->approve();
+                        })->after( function() {
+                            Notification::make()->success()->title('La charla fue aprobada')
+                                ->duration(2000)
+                                ->body('El conferencista ha sido notificado del cambio de estado de la  charla')
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('reject')
+                        ->visible( function ($record) {
+                            return $record->status === (TalkStatus::SUBMITTED);
+                        })
+                        ->icon('heroicon-o-no-symbol')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action( function (Talk $record) {
+                            $record->reject();
+                        })->after( function() {
+                            Notification::make()->danger()->title('La charla fue rechazada')
+                                ->duration(2000)
+                                ->body('El conferencista ha sido notificado')
+                                ->send();
+                        })
+                ]),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('approve')
+                        //->visible( function ($record) { return $record->status === (TalkStatus::SUBMITTED); })
+                        ->color('success')
+                        ->label('Aprobar seleccionados')
+                        ->action( function( Collection $records) {
+                            $records->each->approve();
+                        }),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Eliminar seleccionados'),
+                    Tables\Actions\RestoreBulkAction::make()
+                        ->label('Restaurar seleccionados'),
+                //]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('Export')
+                    ->tooltip('Mandará todo a la chingada, cuidado')
+                    ->action( function($livewire) {
+                        // dd($livewire->getFilteredTableQuery()->count());
+                        dd("Exportando las charlas seleccionadas");
+                    })
             ]);
     }
 
@@ -133,7 +186,7 @@ class TalkResource extends Resource
         return [
             'index' => Pages\ListTalks::route('/'),
             'create' => Pages\CreateTalk::route('/create'),
-            'edit' => Pages\EditTalk::route('/{record}/edit'),
+            // 'edit' => Pages\EditTalk::route('/{record}/edit'),
         ];
     }
 }
