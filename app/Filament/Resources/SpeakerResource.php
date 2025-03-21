@@ -115,7 +115,8 @@ class SpeakerResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            //Establish relationships with Talks
+            RelationManagers\TalksRelationManager::class,
         ];
     }
 
